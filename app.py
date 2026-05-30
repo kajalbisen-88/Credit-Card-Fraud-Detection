@@ -1,37 +1,17 @@
-from flask import Flask, request, render_template
+import streamlit as st
 import joblib
 import numpy as np
 
-app = Flask(__name__)
-
-# Load trained model
 model = joblib.load("fraud_model.pkl")
 
-@app.route("/")
-def home():
-    return """
-    <h2>Credit Card Fraud Detection</h2>
-    <form action="/predict" method="post">
-        <input type="text" name="amount" placeholder="Transaction Amount" required>
-        <button type="submit">Predict</button>
-    </form>
-    """
+st.title("Credit Card Fraud Detection")
 
-@app.route("/predict", methods=["POST"])
-def predict():
-    amount = float(request.form["amount"])
+amount = st.number_input("Enter Amount")
 
-    # Example input (modify according to your model features)
-    features = np.array([[amount]])
-
-    prediction = model.predict(features)
+if st.button("Predict"):
+    prediction = model.predict([[amount]])
 
     if prediction[0] == 1:
-        result = "Fraud Transaction Detected"
+        st.error("Fraud Transaction")
     else:
-        result = "Legitimate Transaction"
-
-    return f"<h3>{result}</h3><a href='/'>Try Again</a>"
-
-if __name__ == "__main__":
-    app.run(debug=True)
+        st.success("Legitimate Transaction")
